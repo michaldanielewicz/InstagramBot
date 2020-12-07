@@ -7,6 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
+from math import trunc
 
 #from selenium.webdriver.support.ui import WebDriverWait
 #from selenium.webdriver.support import expected_conditions
@@ -20,7 +21,6 @@ class InstagramBot:
         self.driver.get("https://www.instagram.com/accounts/login/")
         self.username = username
         self.password = password
-        
         #pass cookies
         self.driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div[2]/button[1]').click()
         #insert login and password
@@ -32,14 +32,19 @@ class InstagramBot:
         self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/div/div/div/button').click()
         #pass notification popup
         self.driver.find_element_by_xpath('/html/body/div[4]/div/div/div/div[3]/button[2]').click()
-
+        #change language
         self._change_language()
 
     def _change_language(self):
-        Select(self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/section/div[3]/div[3]/nav/ul/li[11]/span/select')).select_by_visible_text('English')
+        Select(self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/section/div[3]/div[3]/nav/ul/li[11]/span/select')) \
+            .select_by_visible_text('English')
 
     def _get_user(self, username):
         self.driver.get("https://www.instagram.com/{user}".format(user=username))
+        
+    def _is_public(self, username):
+        self._get_user(username)
+        return not 'This Account is Private' in self.driver.page_source
 
     def _load_users_to_follow(self):
         with open('users_to_follow.txt', 'r') as users_to_follow:
@@ -47,55 +52,58 @@ class InstagramBot:
         print("Users-List from the file have been loaded. Number of records loaded: {}.".format(len(to_follow_list))) 
         return to_follow_list
 
-    def _scroll(self, count_limit, xpath='//div[@class="isgrP"]'):
-        pop_up = self.driver.find_element_by_xpath(xpath)
+    def _scroll_popup(self, count_limit, xpath):
+        self.driver.find_element_by_xpath(xpath).click()  
+        pop_up = self.driver.find_element_by_xpath('//div[@class="isgrP"]')
         scroll_height = self.driver.execute_script("return arguments[0].scrollHeight", pop_up)
+        start_task = time.perf_counter()
         while True:
             self.driver.execute_script("arguments[0].scrollBy(0,arguments[1])", pop_up, scroll_height)
+            scroll_height = self.driver.execute_script("return arguments[0].scrollHeight", pop_up) 
             usernames_count = len(self.driver.find_elements_by_xpath('//div[@class="PZuss"]/li')) 
-            if usernames_count >= count_limit:
+            end_task = time.perf_counter()
+            if usernames_count >= count_limit or (end_task - start_task) > 80 :
+                print("Scroll ended. It took {timer} seconds. Usernames count: {count}." \
+                    .format(timer = end_task-start_task, count = usernames_count))
                 break
             else:
-                time.sleep(0.1)
                 scroll_height  += scroll_height 
+                continue
         usernames_list = [username.text for username in self.driver.find_elements_by_xpath('//div[@class="d7ByH"]')]
         return usernames_list
-
-    def is_public(self, username):
-        self._get_user(username)
-        return not 'This Account is Private' in self.driver.page_source
-
-    def get_followers(self, username = None):
-        if username is None:
-            self._get_user(self.username)
-        else:
-            self._get_user(username)
-        number_of_followers = int(((self.driver.find_elements_by_xpath('//span[@class="g47SY "]'))[1]).text)
-        self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/header/section/ul/li[2]/a').click()     
-        followers_list = self._scroll(number_of_followers)
-        print("Number of loaded followers users: {}.".format(len(followers_list)))
-        self.driver.back()
-        return followers_list
 
     def get_following(self, username = None):
         if username is None:
             self._get_user(self.username)
         else:
             self._get_user(username)
-        number_of_following = int(((self.driver.find_elements_by_xpath('//span[@class="g47SY "]'))[2]).text)
-        self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/header/section/ul/li[3]/a').click()     
-        following_list = self._scroll(number_of_following)
+        number_of_following_on_page = int(((self.driver.find_elements_by_xpath('//span[@class="g47SY "]'))[2]).text)  
+        following_list = self._scroll_popup(number_of_following_on_page, '//*[@id="react-root"]/section/main/div/header/section/ul/li[3]/a')
         print("Number of loaded following users: {}.".format(len(following_list)))
         self.driver.back()
         return following_list        
 
+    def get_followers(self, username = None):
+        if username is None:
+            self._get_user(self.username)
+        else:
+            self._get_user(username)
+        number_of_followers_on_page = int(((self.driver.find_elements_by_xpath('//span[@class="g47SY "]'))[1]).text)
+        followers_list = self._scroll_popup(number_of_followers_on_page, '//*[@id="react-root"]/section/main/div/header/section/ul/li[2]/a')
+        print("Number of loaded followers users: {}.".format(len(followers_list)))
+        self.driver.back()
+        return followers_list
+
     def get_not_following_back(self, username):
-        if self.is_public(username):
+        if self._is_public(username):
             following_list = set(self.get_following(username))
             followers_list = set(self.get_followers(username))
             not_following_back = following_list.difference(followers_list)
-            print("You have {} users not following you back".format(len(not_following_back)))
-            return not_following_back
+            with open('logs/not_following_back_{}.txt'.format(username), 'w') as file:
+                for user in not_following_back:
+                    file.write('{}\n'.format(user.replace('\nVerified','')))
+            print("{user} has {number} not following back users. That's {percent}% of the following list. Results saved to a file." \
+                .format(user=username, number=len(not_following_back), percent=trunc(len(not_following_back)/len(following_list)*100)))
         else:
             return ("The user account {} is private, could not get not-following-back list".format(username))
 
@@ -111,7 +119,7 @@ class InstagramBot:
 
     def like_latest(self, username):
         self._get_user(username) 
-        if self.is_public(username):
+        if self._is_public(username):
             self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/div[3]/article/div/div/div[1]/div[1]').click()
             self.driver.find_element_by_xpath('/html/body/div[5]/div[2]/div/article/div[3]/section[1]/span[1]/button').click()
         else:
@@ -125,7 +133,7 @@ class InstagramBot:
 
 print("InstagramBot. ver. 1.0")
 my_bot = InstagramBot(cfg.USERNAME,cfg.PASSWORD)
-print(my_bot.get_not_following_back("michal_danielewicz"))
+my_bot.get_not_following_back("bartektyminski")
 
 
 
