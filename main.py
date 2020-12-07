@@ -34,6 +34,7 @@ class InstagramBot:
         self.driver.find_element_by_xpath('/html/body/div[4]/div/div/div/div[3]/button[2]').click()
         #change language
         self._change_language()
+        print("Ready.")
 
     def _change_language(self):
         Select(self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/section/div[3]/div[3]/nav/ul/li[11]/span/select')) \
@@ -46,17 +47,12 @@ class InstagramBot:
         self._get_user(username)
         return not 'This Account is Private' in self.driver.page_source
 
-    def _load_users_to_follow(self):
-        with open('users_to_follow.txt', 'r') as users_to_follow:
-            to_follow_list = [username for username in users_to_follow.read().splitlines()]
-        print("Users-List from the file have been loaded. Number of records loaded: {}.".format(len(to_follow_list))) 
-        return to_follow_list
-
     def _scroll_popup(self, count_limit, xpath):
         self.driver.find_element_by_xpath(xpath).click()  
         pop_up = self.driver.find_element_by_xpath('//div[@class="isgrP"]')
         scroll_height = self.driver.execute_script("return arguments[0].scrollHeight", pop_up)
         start_task = time.perf_counter()
+        print("Scroll started.")
         while True:
             self.driver.execute_script("arguments[0].scrollBy(0,arguments[1])", pop_up, scroll_height)
             scroll_height = self.driver.execute_script("return arguments[0].scrollHeight", pop_up) 
@@ -83,7 +79,7 @@ class InstagramBot:
         self.driver.back()
         return following_list        
 
-    def get_followers(self, username = None):
+    def get_followers(self, username = None, save_to_file = False):
         if username is None:
             self._get_user(self.username)
         else:
@@ -92,6 +88,11 @@ class InstagramBot:
         followers_list = self._scroll_popup(number_of_followers_on_page, '//*[@id="react-root"]/section/main/div/header/section/ul/li[2]/a')
         print("Number of loaded followers users: {}.".format(len(followers_list)))
         self.driver.back()
+        if save_to_file:
+            with open('logs/followers_{user}.txt'.format(user=username), 'w') as file:
+                for user in followers_list:
+                    file.write('{}\n'.format(user))
+            print("Followers have been saved to the file.")
         return followers_list
 
     def get_not_following_back(self, username):
@@ -108,10 +109,20 @@ class InstagramBot:
             return ("The user account {} is private, could not get not-following-back list".format(username))
 
     def get_unfollowers(self, username):
-        pass
-        #check who unfollows the user 
-        #in order to do this it has to be compared some list from the past (for example one day) to current follows list
-        #time interval needed
+        if self._is_public(username):
+            try:
+                past_followers_file_dir = ('logs/followers_{user}.txt'.format(user=username))
+                with open(past_followers_file_dir, 'r') as file:
+                    print('Succesfully read {} file'.format(past_followers_file_dir))
+                    past_followers = set([follower.rstrip() for follower in file])
+                current_followers = set(self.get_followers(username))
+                unfollowers = past_followers.difference(current_followers)
+                print("{user} has {number} unfollowers: {users}".format(user=username, number=len(unfollowers), users = unfollowers))
+            except OSError:
+                print("There is no saved copy of followers list for this user. Do you want to create one right now? (Y/N)")
+                self.get_followers(username, save_to_file = True)
+        else:
+            return ("The user account {} is private, could not get not-following-back list".format(username))
 
     def follow_user(self, username):
         self._get_user(username)
@@ -126,14 +137,17 @@ class InstagramBot:
             print("The {user} user is private, can't like latest post.".format(user=username))
 
     def follow_from_file(self):
-        for username in self._load_users_to_follow():
+        with open('users_to_follow.txt', 'r') as users_to_follow:
+            to_follow_list = [username for username in users_to_follow.read().splitlines()]
+        print("Users-List from the file have been loaded. Number of records loaded: {}.".format(len(to_follow_list))) 
+        for username in to_follow_list:
             self.follow_user(username)
             print("The {user} has been followed".format(user=username))
             
 
 print("InstagramBot. ver. 1.0")
 my_bot = InstagramBot(cfg.USERNAME,cfg.PASSWORD)
-my_bot.get_not_following_back("bartektyminski")
+my_bot.get_unfollowers("michal_danielewicz")
 
 
 
