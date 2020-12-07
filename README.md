@@ -14,11 +14,13 @@ account (or yours, it isn't pushed outside) and check any user.
 
 ## Setup
 Download ChromeDriver from [developers site](https://chromedriver.chromium.org/).\
-You have to edit config.py and enter you accounts details. It can be newly created account just for bot-related purposes or you main account. If you use your real account details your account can be private to check unfollows. In another case you have to change it for a moment for bot be able to check unfollows. :) Watch out for anormal activity that Instagram can trace.\
-Change desired username in my_bot.get_not_following_back and run main.py.
+You have to edit config.py and enter you accounts details. It can be newly created account just for bot-related purposes or you main account. If you use your real account details your account can be private to check unfollows. In another case you have to change it for a moment for bot be able to check unfollows. :) \
+Enter your account details in config.py and run the main.py. In this moment there are two commands: 
+* [-n] check users not following back given user.
+* [-u] unfollowers for a given user.
 
 ## Features
-List of features ready and TODOs for future development. \ \
+List of features ready and TODOs for future development. \ 
 Ready:
 * List not-following-back for given user and save results to the file.
 * List unfollowers for given user. (Check for differences between followers list from the past and current.)
@@ -29,11 +31,12 @@ To-do list:
 * Auto-like feature. 
 * Auto-follow feature.
 * Check users you are not following, but they are following you.
-* Give arguments in cmd shell.
 * Decide to like post or not based on some factors (like sex, number of likes etc.).
 * Modify scrolling list to be more efficient and error-proof.
 * Add some random timing delays to not get caught using automated software.
 * Save cookies for later use. (Skip login).
+* Add follows-value for each user in the unfollow list.
+* Add interactive form for following users, one by one, by pressing y/n on the terminal.
 
 ## Status
 Project is: _in progress_.

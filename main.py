@@ -12,6 +12,7 @@ from math import trunc
 #from selenium.webdriver.support.ui import WebDriverWait
 #from selenium.webdriver.support import expected_conditions
 import time
+import argparse
 import config as cfg
 
 class InstagramBot:
@@ -143,11 +144,23 @@ class InstagramBot:
         for username in to_follow_list:
             self.follow_user(username)
             print("The {user} has been followed".format(user=username))
-            
 
-print("InstagramBot. ver. 1.0")
-my_bot = InstagramBot(cfg.USERNAME,cfg.PASSWORD)
-my_bot.get_unfollowers("michal_danielewicz")
+
+parser = argparse.ArgumentParser(description="check who unfollowed you or are not following you back")
+parser.add_argument("-u", "--unfollowers", type=str, help="check unfollowers of the given username")
+parser.add_argument("-n", "--notfollowingback", type=str, help="check users not following back the given username")
+args = parser.parse_args()
+
+if args.unfollowers:
+    username = args.unfollowers
+    my_bot = InstagramBot(cfg.USERNAME,cfg.PASSWORD)
+    my_bot.get_unfollowers(username)
+
+if args.notfollowingback:
+    username = args.notfollowingback
+    my_bot = InstagramBot(cfg.USERNAME,cfg.PASSWORD)
+    my_bot.get_not_following_back(username)
+
 
 
 
