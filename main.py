@@ -1,4 +1,4 @@
-"""Scraper and bot opearating on Instagram.
+"""Scraper and bot operating on Instagram.
 
 InstagramBot able to check unfollows for a given user
 or check users not following back. Also operates simple
@@ -18,6 +18,7 @@ from selenium.common.exceptions import NoSuchElementException
 #from selenium.webdriver.support import expected_conditions
 
 import config as cfg
+import exceptions
 
 class InstagramBot:
     """
@@ -44,6 +45,7 @@ class InstagramBot:
             self.driver.find_element_by_xpath("//input[@name=\"password\"]").send_keys(self.password)
             #click login
             self.driver.find_element_by_xpath('//*[@id="loginForm"]/div/div[3]').click()
+            time.sleep(2)
             #pass rember login popoup
             self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/div/div/div/button').click()
             #pass notification popup
@@ -58,10 +60,12 @@ class InstagramBot:
         Select(self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/section/div[3]/div[3]/nav/ul/li[11]/span/select')) \
             .select_by_visible_text('English')
 
-    #TODO: check if user exists, if not raise error
+    #TODO: add exception such user does not exist
     def _get_user(self, username):
         """Gets desired user site."""
         self.driver.get("https://www.instagram.com/{}".format(username))
+        if "this page isn't available" in self.driver.page_source:
+            raise exceptions.NoSuchUserException(username)
 
     def _is_public(self, username):
         """Checks if userpage is public."""
@@ -81,7 +85,7 @@ class InstagramBot:
             end_task = time.perf_counter()
             if usernames_count >= count_limit or end_task - start_task > 80 :
                 print("Scroll ended. It took {timer} seconds. Usernames counted: {count}." \
-                    .format(timer = end_task-start_task, count = usernames_count))
+                    .format(timer = trunc(end_task-start_task), count = usernames_count))
                 break
             scroll_height += scroll_height
         usernames_list = [username.text for username in self.driver.find_elements_by_xpath('//div[@class="d7ByH"]')]
@@ -118,6 +122,7 @@ class InstagramBot:
         self.driver.back()
         return followers_list
 
+    #TODO: get value of followers for each user not following back
     def get_not_following_back(self, username):
         """Gets user that are followed but are not following back given user."""
         if self._is_public(username):
@@ -127,12 +132,12 @@ class InstagramBot:
             with open('logs/not_following_back_{}.txt'.format(username), 'w') as file:
                 for user in not_following_back:
                     file.write('{}\n'.format(user.replace('\nVerified','')))
-            print("{user} has {number} not following back users. That's {percent}% of the following list. Results saved to a file." \
+            print("{user} has {number} not following back users. That's {percent}% of the following list. Results saved to a file in /logs." \
                 .format(user=username, number=len(not_following_back), percent=trunc(len(not_following_back)/len(following_list)*100)))
         else:
             print("The user account {} is private, could not get not-following-back list".format(username))
 
-    #TODO: add module that will check if unfollower has a deleted account, add posibility to save file (oserror)
+    #TODO: add module that will check if unfollower has a deleted account
     def get_unfollowers(self, username):
         """Gets users that had followed given user but unfollowed after some time."""
         if self._is_public(username):
@@ -140,7 +145,6 @@ class InstagramBot:
                 past_followers_file_dir = ('logs/followers_{user}.txt'.format(user=username))
                 with open(past_followers_file_dir, 'r') as file:
                     print('Succesfully read {} file'.format(past_followers_file_dir))
-                    #past_followers = set([follower.rstrip() for follower in file])
                     past_followers = {follower.rstrip() for follower in file}
                 current_followers = set(self.get_followers(username))
                 unfollowers = past_followers.difference(current_followers)
@@ -151,15 +155,22 @@ class InstagramBot:
         else:
             print("The user account {} is private, could not get not-following-back list".format(username))
 
-    #TODO: change xpath, check is it working with private accounts, make it quicker if followed before
+    #TODO: ensure print if followed before
     def follow_user(self, username):
         """Follows given user."""
         self._get_user(username)
         try:
-            self.driver.find_element_by_xpath('//*[contains(text(), "Follow")]').click()
+            self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/div/div/div/span/span[1]/button').click()
             print("{} has been followed.".format(username))
-        except:
-            print("{} had been followed before. Skip.".format(username))
+        except NoSuchElementException:
+            try:
+                self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/header/section/div[1]/div[2]/div/div/div/span/span[1]/button').click()
+                print("{} has been followed.".format(username))
+            except NoSuchElementException:
+                try:
+                    self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/div/div/button').click()
+                except:
+                    print("Could not follow {}.".format(username))
 
     def like_latest(self, username):
         """Likes latest post of desired user."""
@@ -170,34 +181,31 @@ class InstagramBot:
         else:
             print("The {user} user is private, can't like latest post.".format(user=username))
 
+    #TODO: handle exception 'suchusernotexist' - just continue loop
     def follow_from_file(self):
         """Follows users given in users_to_follow.txt file."""
         with open('users_to_follow.txt', 'r') as file:
-            #to_follow_list = [username for username in file.read().splitlines()]
             to_follow_list = file.read().splitlines()
         print("Users list from the file have been loaded. Number of records loaded: {}.".format(len(to_follow_list)))
         for username in to_follow_list:
             self.follow_user(username)
         print("Users have been followed.")
 
-parser = argparse.ArgumentParser(description="check who unfollowed you or are not following you back")
-parser.add_argument("-u", "--unfollowers", type=str, help="check unfollowers of the given username")
-parser.add_argument("-n", "--notfollowingback", type=str, help="check users not following back the given username")
-parser.add_argument("-f", "--followusers", action="store_true", help="follow users from the file")
+parser = argparse.ArgumentParser(prog="main.py", description="check who unfollowed you or are not following you back")
+parser.add_argument("username", nargs="?", default=cfg.USERNAME, type=str, help="check desired user")
+parser.add_argument("-u", "--unfollowers", action="store_true", help="check unfollowers for the given user")
+parser.add_argument("-n", "--notfollowingback", action="store_true", help="check users not following back the given user")
+parser.add_argument("-f", "--follow", action="store_true", help="follow users from the file")
 args = parser.parse_args()
 
 if args.unfollowers:
-    check_user = args.unfollowers
     my_bot = InstagramBot(cfg.USERNAME, cfg.PASSWORD, cfg.SKIP_LOGIN)
-    my_bot.get_unfollowers(check_user)
+    my_bot.get_unfollowers(args.username)
 
 if args.notfollowingback:
-    check_user = args.notfollowingback
     my_bot = InstagramBot(cfg.USERNAME, cfg.PASSWORD, cfg.SKIP_LOGIN)
-    my_bot.get_not_following_back(check_user)
+    my_bot.get_not_following_back(args.username)
 
-if args.followusers:
+if args.follow:
     my_bot = InstagramBot(cfg.USERNAME, cfg.PASSWORD, cfg.SKIP_LOGIN)
     my_bot.follow_from_file()
-
-#add optional argument - user, if no user given assume username given as account given in configS
