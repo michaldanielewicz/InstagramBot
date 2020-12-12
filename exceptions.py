@@ -1,4 +1,4 @@
-
+"""List of exceptions for InstagramBot."""
 
 class Error(Exception):
     """Base class for other exceptions."""
@@ -6,12 +6,14 @@ class Error(Exception):
 
 class NoSuchUserException(Error):
     """Raised when desired user does not exist."""
-
     def __init__(self, username):
             self.username = username
-            self.message = "User {} does not exist.".format(self.username)
+            self.message = "User {} does not exist or deleted account.".format(self.username)
             super().__init__(self.message)
 
-class UserAccountPrivate(Error):
+class UserAccountPrivateException(Error):
     """Raised when desired user account is not public."""
-    pass
+    def __init__(self, username):
+        self.username = username
+        self.message = "User {} is private.".format(self.username)
+        super().__init__(self.message)
