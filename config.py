@@ -7,10 +7,18 @@ In order to work you have to turn-off two-step authetication.
 '''
 
 # Enter account username:
-USERNAME = ""     
+USERNAME = "mariuszstykala6"     
 
 # Enter account password:
-PASSWORD = "" 
+PASSWORD = "mariuszstykala2001" 
 
-# Skip login if you want to browser remember login details - function not implemented yet:
-SKIP_LOGIN = False                  
+# Skip login if you want to browser remember login details:
+SKIP_LOGIN = True                  
+
+# Disable images on website - bot works faster (only with SKIP_LOGIN = TRUE):
+DISABLE_IMAGES = True
+
+# Default message to pass in the comment section:
+COMMENT = "Hello! Nice post. :)"
+
+
