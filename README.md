@@ -26,17 +26,17 @@ You have to edit config.py and enter you accounts details. It can be newly creat
 List of features ready and TODOs for future development.
 
 ### Ready:
-* List not-following-back for given user, show their follows number, and save results to the file.
-* List unfollowers for given user. (Check for differences between followers list from the past and current.)
-* Follow people from follow list.
 * Remember login credentials (skip login) and disable images for a better performance.
+* List not-following-back for given user.
+* List users not followed by given user.
+* Show users follows number and save results to the file.
+* List unfollowers for given user. (Checks for differences between followers list from the past and current.)
+* Follow people from follow list.
 
 ### To-do list:
-* Like posts from given user.
-* Modify scrolling list to be more efficient and error-proof.
-* Add some random timing delays to not get caught using automated software.
 * Ghost followers (people who did not like any of your photo).
-* Followers leaderboard (most active followers).s
+* Followers leaderboard (most active followers).
+* Like posts from given user.
 * Comment function with given text.
 
 ## Status
