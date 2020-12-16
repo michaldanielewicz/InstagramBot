@@ -17,3 +17,9 @@ class UserAccountPrivateException(Error):
         self.username = username
         self.message = "User {} is private.".format(self.username)
         super().__init__(self.message)
+        
+class TooManyLogs(Error):
+    """Raised when too many actions are taken by bot."""
+    def __init__(self):
+        self.message = "Too many actions. Wait or change account in config.py"
+        super().__init__(self.message)
