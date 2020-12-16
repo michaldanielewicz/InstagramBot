@@ -17,7 +17,6 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 
-#from selenium.webdriver.common.keys import Keys
 #from selenium.webdriver.support.ui import WebDriverWait
 #from selenium.webdriver.support import expected_conditions
 
@@ -32,7 +31,7 @@ class InstagramBot:
     """
 
     def __init__(self, username, password, skip_login, disable_images):
-        """Inits InstagramBot with driver setup."""
+        """Inits InstagramBot setups chrome driver."""
         self.username = username
         self.password = password
         if skip_login:
@@ -47,44 +46,48 @@ class InstagramBot:
         self.driver.implicitly_wait(10)
         self.driver.get("https://www.instagram.com/accounts/login/")
         if self.driver.current_url != ("https://www.instagram.com/"):
-            #pass cookies
-            self.driver.find_element_by_xpath\
-                ('/html/body/div[2]/div/div/div/div[2]/button[1]').click()
-            #insert login and password
-            self.driver.find_element_by_xpath\
-                ("//input[@name=\"username\"]").send_keys(self.username)
-            self.driver.find_element_by_xpath\
-                ("//input[@name=\"password\"]").send_keys(self.password)
-            #click login
-            self.driver.find_element_by_xpath\
-                ('//*[@id="loginForm"]/div/div[3]').click()
-            #pass rember login popoup
-            self.driver.find_element_by_xpath\
-                ('//*[@id="react-root"]/section/main/div/div/div/section/div/button').click()
-            #pass notification popup
-            self.driver.find_element_by_xpath\
-                ('/html/body/div[4]/div/div/div/div[3]/button[2]').click()
+            self._log_in()
         self._change_language()
 
+    def _log_in(self):
+        """Log in as username and password given in config.py"""
+        #Pass cookies
+        self.driver.find_element_by_xpath\
+            ('/html/body/div[2]/div/div/div/div[2]/button[1]').click()
+        #Insert login and password
+        self.driver.find_element_by_xpath\
+            ("//input[@name=\"username\"]").send_keys(self.username)
+        self.driver.find_element_by_xpath\
+            ("//input[@name=\"password\"]").send_keys(self.password)
+        #Click login
+        self.driver.find_element_by_xpath\
+            ('//*[@id="loginForm"]/div/div[3]').click()
+        #Pass remember login popoup
+        self.driver.find_element_by_xpath\
+            ('//*[@id="react-root"]/section/main/div/div/div/section/div/button').click()
+        #Pass notification popup
+        self.driver.find_element_by_xpath\
+            ('/html/body/div[4]/div/div/div/div[3]/button[2]').click()
+
     def _change_language(self):
-        """Changes language to english."""
+        """Changes language to english - crucial for some methods."""
         Select(self.driver.find_element_by_xpath\
             ('//*[@id="react-root"]/section/main/section/div[3]/div[3]/nav/ul/li[11]/span/select'))\
             .select_by_visible_text('English')
 
     def _get_user(self, username):
-        """Gets desired user site."""
+        """Gets user page."""
         self.driver.get("https://www.instagram.com/{}".format(username))
         if "this page isn't available" in self.driver.page_source:
             raise exceptions.NoSuchUserException(username)
 
     def _is_public(self, username):
-        """Checks if userpage is public."""
+        """Checks if userpage is public (or just available)."""
         self._get_user(username)
         return not 'This Account is Private' in self.driver.page_source
 
     def _get_how_many_followers(self, username):
-        """Gets number of followers of desired user."""
+        """Gets number of followers of user."""
         self._get_user(username)
         how_many_followers = self.driver.find_elements_by_xpath('//span[@class="g47SY "]')[1].text
         if not how_many_followers.isdigit():
@@ -104,12 +107,12 @@ class InstagramBot:
             return int(how_many_followers)
 
     def _get_how_many_following(self, username):
-        """Gets number of following of desired user."""
+        """Gets number of user followings."""
         self._get_user(username)
         return int(((self.driver.find_elements_by_xpath('//span[@class="g47SY "]'))[2]).text)
 
     def _get_how_many_posts(self):
-        """Gets number of post of desired users."""
+        """Gets number of user post."""
         return int(((self.driver.find_elements_by_xpath('//span[@class="g47SY "]'))[0]).text)
 
     def _scroll_popup(self, count_limit, xpath):
@@ -196,8 +199,9 @@ class InstagramBot:
                         format(username)).upper()
                 if answer == "Y":
                     self.get_followers(username, save_to_file=True)
+
                 elif answer == "N":
-                    print("Could not get unfollowers list with previous followers list.")
+                    print("Could not get unfollowers list without previous followers list.")
                 else:
                     raise exceptions.Error()
         else:
@@ -208,15 +212,24 @@ class InstagramBot:
         if self._is_public(username):
             number_of_posts_on_page = self._get_how_many_posts()
             number_of_clicks = 0
+            #click latest post
             self.driver.find_element_by_xpath\
                 ('//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/div[1]/div[1]/a/div').click()
             while True:
-                #cant find right element:
-                self.driver.find_element_by_xpath('/html/body/div[5]/div[1]/div/div/a[2]').click()
-                
+                #click likes list 
+            #    self.driver.find_element_by_xpath\
+            #    ('/html/body/div[5]/div[2]/div/article/div[3]/section[2]/div/div[2]/button').click()
+                #scroll through popup window to the end
+
+                #get every user and get them to the list
+
+                #click next photo arrow button until last post
+               # self.driver.execute_script()
                 number_of_clicks += 1
                 if number_of_clicks == number_of_posts_on_page - 1:
+                    print(number_of_clicks)
                     break
+            #print or save to the file from top reaction to less
 
         else:
             raise exceptions.UserAccountPrivateException(username)
@@ -255,7 +268,7 @@ class InstagramBot:
         else:
             raise exceptions.UserAccountPrivateException(username)
 
-    def comment_latest_post(self, username, message = "Hello!"):
+    def comment_latest_post(self, username, message):
         """Comment latest post of desired user with given message."""
         if self._is_public(username):
             self.driver.find_element_by_xpath\
@@ -309,6 +322,6 @@ if args.notfollowingback:
 if args.follow:
     my_bot.follow_from_file(args.like)
 
-#my_bot.get_leaderboard('michal_danielewicz')
+my_bot.get_leaderboard('michal_danielewicz')
 
-my_bot.driver.quit()
+#my_bot.driver.quit()

@@ -36,7 +36,7 @@ List of features ready and TODOs for future development.
 * Modify scrolling list to be more efficient and error-proof.
 * Add some random timing delays to not get caught using automated software.
 * Ghost followers (people who did not like any of your photo).
-* Followers leaderboard (most active followers).
+* Followers leaderboard (most active followers).s
 * Comment function with given text.
 
 ## Status
