@@ -5,20 +5,19 @@ or check users not following back. Also operates simple
 task like following people from file or like posts.
 """
 
-import config as cfg
-import exceptions
-
-from math import trunc
 import time
 import argparse
 import os.path
+from math import trunc
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
-
 #from selenium.webdriver.support.ui import WebDriverWait
 #from selenium.webdriver.support import expected_conditions
+
+import config as cfg
+import exceptions
 
 class InstagramBot:
     """
@@ -39,7 +38,7 @@ class InstagramBot:
             self.chrome_options.add_argument('--user-data-dir=chrome_options/')
             if disable_images:
                 prefs = {"profile.managed_default_content_settings.images": 2}
-                self.chrome_options.add_experimental_option("prefs", prefs)    
+                self.chrome_options.add_experimental_option("prefs", prefs)
             self.driver = webdriver.Chrome(options=self.chrome_options)
         else:
             self.driver = webdriver.Chrome()
@@ -102,9 +101,8 @@ class InstagramBot:
             how_many_followers_new = "".join(how_many_followers_list)
             if '.' in how_many_followers:
                 how_many_followers_new = how_many_followers_new[:-1]
-            return int(how_many_followers_new)
-        else:
-            return int(how_many_followers)
+            how_many_followers = how_many_followers_new
+        return int(how_many_followers)
 
     def _get_how_many_following(self, username):
         """Gets number of user followings."""
@@ -199,11 +197,8 @@ class InstagramBot:
                         format(username)).upper()
                 if answer == "Y":
                     self.get_followers(username, save_to_file=True)
-
-                elif answer == "N":
-                    print("Could not get unfollowers list without previous followers list.")
                 else:
-                    raise exceptions.Error()
+                    print("Could not get unfollowers list without previous followers list.")
         else:
             raise exceptions.UserAccountPrivateException(username)
 
@@ -216,7 +211,7 @@ class InstagramBot:
             self.driver.find_element_by_xpath\
                 ('//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/div[1]/div[1]/a/div').click()
             while True:
-                #click likes list 
+                #click likes list
             #    self.driver.find_element_by_xpath\
             #    ('/html/body/div[5]/div[2]/div/article/div[3]/section[2]/div/div[2]/button').click()
                 #scroll through popup window to the end
