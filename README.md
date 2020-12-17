@@ -17,19 +17,22 @@ Download ChromeDriver from [developers site](https://chromedriver.chromium.org/)
 You have to edit config.py and enter you accounts details. It can be newly created account just for bot-related purposes or you main account. If you use your real account details your account can be private. In another case you have to change it for a moment for bot be able to check unfollows. :) 
 \Enter your account details in config.py and run the main.py.
 
-## Code example
-* [-n] *username* check users not following back given user.
+## Code usage
 * [-u] *username* unfollowers for a given user.
+* [-nu] *username* check users not following back given user.
+* [-un] *username* check which users are not followed back by user.
+* [-nf] gives ouput without followers value.
 * [-f] follow each record in txt file.
 
 ## Features
 List of features ready and TODOs for future development.
 
 ### Ready:
-* Remember login credentials (skip login) and disable images for a better performance.
+* Remember login credentials - skip login (optional).
+* Disable images for a better performance (optional).
 * List not-following-back for given user.
 * List users not followed by given user.
-* Show users follows number and save results to the file.
+* Show users follows number and save results to the file (optional).
 * List unfollowers for given user. (Checks for differences between followers list from the past and current.)
 * Follow people from follow list.
 
