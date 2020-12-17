@@ -127,7 +127,8 @@ class InstagramBot:
         window_height = 0
         start_scrolling = time.perf_counter()
         while True:
-            self.driver.execute_script('arguments[0].scrollBy(0,arguments[1])', pop_up, scroll_height)
+            self.driver.execute_script('arguments[0].scrollBy(0,arguments[1])',
+                                        pop_up, scroll_height)
             scroll_height = self.driver.execute_script('return arguments[0].scrollHeight', pop_up)
             if window_height != self.driver.execute_script('return arguments[0].scrollHeight', pop_up):
                 window_height = self.driver.execute_script('return arguments[0].scrollHeight', pop_up)
@@ -137,7 +138,8 @@ class InstagramBot:
                 break
             scroll_height += scroll_height
         print(f'Scroll ended. It took {trunc(end_scrolling - start_scrolling)} seconds.')
-        usernames_list = [(username.text).replace('\nVerified','') for username in self.driver.find_elements_by_xpath('//div[@class="d7ByH"]')]
+        usernames_list = [(username.text).replace('\nVerified','')
+                          for username in self.driver.find_elements_by_xpath('//div[@class="d7ByH"]')]
         return usernames_list
 
     def _get_non_following_back(self, username, first_list, second_list, get_followers_value):
@@ -162,7 +164,7 @@ class InstagramBot:
             ('//*[@id="react-root"]/section/main/div/header/section/ul/li[3]/a').click()
         print('Getting following list...')
         following_list = self._scroll_popup()
-        print(f'Number of loaded following users: {len(following_list)}. ' 
+        print(f'Number of loaded following users: {len(following_list)}. '
               f'{number_of_following_on_page - len(following_list)} users missed.')
         return following_list
 
@@ -186,21 +188,27 @@ class InstagramBot:
         """Gets users that are followed but are not following back given user."""
         following_list = set(self.get_following(username))
         followers_list = set(self.get_followers(username))
-        not_following_back = self._get_non_following_back(username, following_list, followers_list, get_followers_value)
+        not_following_back = self._get_non_following_back(username, following_list,
+                                                          followers_list, get_followers_value)
         with open(f'logs/not_following_back_{username}.txt', 'w') as file:
             for user in not_following_back:
                 file.write(f'{user}\n')
-        print(f"{username} has {len(not_following_back)} not following back users. That's {trunc(len(not_following_back)/len(following_list)*100)}% of the following list. Results are saved to the file in /logs.")
+        print(f"{username} has {len(not_following_back)} not following back users. "
+              f"That's {trunc(len(not_following_back)/len(following_list)*100)}% of the list. "
+              "Results are saved to the file in /logs.")
 
     def get_user_not_following_back(self, username, get_followers_value=True):
         """Gets users that are not followed back by user."""
         following_list = set(self.get_following(username))
         followers_list = set(self.get_followers(username))
-        not_following_back = self._get_non_following_back(username, followers_list, following_list, get_followers_value)
+        not_following_back = self._get_non_following_back(username, followers_list,
+                                                          following_list, get_followers_value)
         with open(f'logs/{username}_not_following_back.txt', 'w') as file:
             for user in not_following_back:
                 file.write(f'{user}\n')
-        print(f"{username} is not following back {len(not_following_back)} users. That's {trunc(len(not_following_back)/len(followers_list)*100)}% of the following list. Results are saved to the file in /logs.")
+        print(f"{username} is not following back {len(not_following_back)} users. "
+              f"That's {trunc(len(not_following_back)/len(followers_list)*100)}% of the list. "
+               "Results are saved to the file in /logs.")
 
     def get_unfollowers(self, username, get_followers_value=True):
         """Gets users that had followed given user but unfollowed after some time."""
@@ -209,7 +217,8 @@ class InstagramBot:
                 past_followers_dir = (f'logs/followers_{username}.txt')
                 with open(past_followers_dir, 'r') as file:
                     past_followers = {follower.rstrip() for follower in file}
-                print(f'Succesfully read {past_followers_dir} file last modified: {time.ctime(os.path.getmtime(past_followers_dir))}')
+                print(f'Succesfully read {past_followers_dir} '
+                      f'last modified on: {time.ctime(os.path.getmtime(past_followers_dir))}')
                 current_followers = set(self.get_followers(username))
                 unfollowers = past_followers.difference(current_followers)
                 active_unfollowers = []
@@ -227,11 +236,14 @@ class InstagramBot:
                 with open(f'logs/unfollowers_{username}.txt', 'w') as file:
                     for user in active_unfollowers:
                         file.write(f'{user}\n')
-                print(f'{username} has {len(active_unfollowers)} active unfollower(s). Results saved to the file in /logs. User(s) that could not be found: {deleted_users}')
+                print(f'{username} has {len(active_unfollowers)} active unfollower(s). '
+                       'Results saved to the file in /logs. '
+                      f'User(s) that could not be found: {deleted_users}')
             except OSError:
                 answer = ''
                 while answer not in ('Y', 'N'):
-                    answer = input(f'Past followers for {username} not found. Do you want to create it right now? (Y/N): '.upper())
+                    answer = input(f'Past followers for {username} not found. '
+                                   f'Do you want to create it right now? (Y/N): '.upper())
                 if answer == "Y":
                     self.get_followers(username, save_to_file=True)
                 else:
