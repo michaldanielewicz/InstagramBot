@@ -23,6 +23,7 @@ Enter your account details in config.py and run the main.py.
 * [-nu] *username* check users not following back given user.
 * [-un] *username* check which users are not followed back by user.
 * [-nf] gives ouput without followers value.
+* [-lb] *username* check user most active followers (in last 10 posts).
 * [-f] follow each record in txt file.
 
 ## Features
