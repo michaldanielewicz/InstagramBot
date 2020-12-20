@@ -14,8 +14,9 @@ account (or yours, it isn't pushed outside) and check any user.
 
 ## Setup
 Download ChromeDriver from [developers site](https://chromedriver.chromium.org/).\
-You have to edit config.py and enter you accounts details. It can be newly created account just for bot-related purposes or you main account. If you use your real account details your account can be private. In another case you have to change it for a moment for bot be able to check unfollows. :) 
-\Enter your account details in config.py and run the main.py.
+You have to edit config.py and enter you accounts details. It can be newly created account just for bot-related purposes or you main account. If you use your real account details your account can be private. In another case you have to change it for a moment for bot be able to check unfollows. :)
+   
+Enter your account details in config.py and run the main.py.
 
 ## Code usage
 * [-u] *username* unfollowers for a given user.
@@ -34,11 +35,11 @@ List of features ready and TODOs for future development.
 * List users not followed by given user.
 * Show users follows number and save results to the file (optional).
 * List unfollowers for given user. (Checks for differences between followers list from the past and current.)
+* Followers leaderboard (most active followers).
 * Follow people from follow list.
 
 ### To-do list:
 * Ghost followers (people who did not like any of your photo).
-* Followers leaderboard (most active followers).
 * Like posts from given user.
 * Comment function with given text.
 
