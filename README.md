@@ -12,11 +12,19 @@ account (or yours, it isn't pushed outside) and check any user.
 * Selenium - version 3.141.59
 * ChromeDriver - version 87.0.4280.88
 
-## Setup
-Download ChromeDriver from [developers site](https://chromedriver.chromium.org/).\
-You have to edit config.py and enter you accounts details. It can be newly created account just for bot-related purposes or you main account. If you use your real account details your account can be private. In another case you have to change it for a moment for bot be able to check unfollows. :)
-   
-Enter your account details in config.py and run the main.py.
+## Prerequisites
+For running my script you have to download ChromeDriver from [developers site](https://chromedriver.chromium.org/).  
+
+## Config
+Before first use it is necessary to edit **config.py**.  
+Enter your main user account details or newly created. Notice that if you would like to check private account you have to get permissions for following user.
+```bash
+# Enter account username:
+USERNAME = "    " 
+# Enter account password:
+PASSWORD = "    "
+```
+And you are ready to run **main.py**.
 
 ## Code usage
 * [-u] *username* unfollowers for a given user.
@@ -25,6 +33,12 @@ Enter your account details in config.py and run the main.py.
 * [-nf] gives ouput without followers value.
 * [-lb] *username* check user most active followers (in last 10 posts).
 * [-f] follow each record in txt file.
+  
+For example running script:
+```bash
+python main.py -nu michal_danielewicz
+```
+will find users not following me back with followers value each. :) 
 
 ## Features
 List of features ready and TODOs for future development.
