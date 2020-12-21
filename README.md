@@ -1,11 +1,11 @@
 # InstagramBot
-> I want to create a bot that will automate some actions like follow users, like posts, check unfollows and not-following-back lists. \
-> It does not use official Instagram API.
 
 ## General info
-I wanted to create this bot to improve my skills in Selenium and Python. Apart from that I was just curious who unfollowed my from my friends. \
-Unfortunately most apps and sites that are available online require you to give them your main account password. With this bot you can use any 
-account (or yours, it isn't pushed outside) and check any user. 
+With this script you can easily check any account for unfollowers, users not following back and many more. Check Code Usage section below for more functions.  
+
+## Why
+I wanted to create this bot to improve my skills in Selenium and Python. Apart from that I was just curious. :)  
+Sure there is an official Instagram API but there are some restrictions so I decided to develop my own software. 
 
 ## Technologies
 * Python - version 3.8.2
@@ -40,21 +40,21 @@ For example running script:
 python main.py -nu michal_danielewicz
 ```
 will find users not following me back with followers value each. :)  
-The results are saved to *.txt file in /logs.
+All results are saved to *.txt file in /logs.
 
 ## Features
-List of features ready and TODOs for future development.
+List of features ready and TODOs for a future development.
 
 ### Ready:
 * Remember login credentials - skip login (optional).
 * Disable images for a better performance (optional).
-* List not-following-back for given user.
-* List users not followed by given user.
-* Show users follows number and save results to the file (optional).
-* List unfollowers for given user. (Checks for differences between followers list from the past and current.)
-* Followers leaderboard (most active followers).
+* List not-following-back for the user.
+* List users not followed by the user.
+* Show users follows-number.
+* List unfollowers of the user - checks differences between lists from a past and current.
+* Followers leaderboard - most active followers of the user.
+* Ghost followers - people who did not like any of the user photo.
 * Follow people from follow list.
-* Ghost followers (people who did not like any of your photo).
 
 ### To-do list:
 * Save results to *.csv file.
