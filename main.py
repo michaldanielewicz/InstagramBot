@@ -1,4 +1,4 @@
-"""Scraper and bot operating on Instagram.
+"""Scraping script  operating on Instagram.
 
 Check unfollows.
 Check non-following back users.
@@ -15,6 +15,9 @@ from math import trunc
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By 
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 import config as cfg
 import exceptions
@@ -44,6 +47,7 @@ class InstagramBot:
             self.driver = webdriver.Chrome(options=self.chrome_options)
         else:
             self.driver = webdriver.Chrome()
+        self.wait = WebDriverWait(self.driver, 10)
         self.driver.implicitly_wait(10)
         self.driver.get('https://www.instagram.com/accounts/login/')
         if self.driver.current_url != ('https://www.instagram.com/'):
@@ -116,22 +120,23 @@ class InstagramBot:
         """Gets number of user post."""
         return int(((self.driver.find_elements_by_xpath('//span[@class="g47SY "]'))[0]).text)
 
-    # TODO: add expclityi wait for get elements (instead of timers ``)
     def _scroll_likes(self):
         """Gets number of likes under post."""
         # Click likes list.
         self.driver.find_element_by_xpath(
-            '/html/body/div[5]/div[2]/div/article/div[3]/section[2]/div/div/button').click()
-        time.sleep(3)
-        pop_up = self.driver.find_element_by_xpath(
-            '/html/body/div[6]/div/div/div[2]/div')
+            '/html/body/div[5]/div[2]/div/article/div[3]/section[2]/div/div/button').click()        
+        pop_up = self.wait.until(
+            EC.presence_of_element_located((By.XPATH, 
+                '/html/body/div[5]/div[2]/div/article/div[3]/section[2]/div/div/button')))
 
         def get_current_scroll_height():
-            return self.driver.execute_script('return arguments[0].scrollHeight', pop_up)
+            return self.driver.execute_script(
+                'return arguments[0].scrollHeight', pop_up)
 
         def scroll_into(element):
             self.driver.execute_script(
                 'arguments[0].scrollIntoView()', element)
+
         users_that_liked_post = []
         window_height_changed = time.perf_counter()
         while True:
@@ -160,6 +165,7 @@ class InstagramBot:
         def scroll_down(height_to_scroll):
             self.driver.execute_script('arguments[0].scrollBy(0,arguments[1])',
                                        pop_up, height_to_scroll)
+
         window_height = 0
         start_scrolling = time.perf_counter()
         while True:
@@ -291,8 +297,9 @@ class InstagramBot:
     def get_leaderboard(self, username, number_of_posts=10, count_occurences=True):
         """Gets likes from each post on user page and create top-interactions-followers board."""
         if self._is_public(username):
-            if number_of_posts == 0:
-                number_of_posts = self._get_how_many_posts()
+            number_of_posts_on_page = self._get_how_many_posts()
+            if number_of_posts > number_of_posts_on_page or number_of_posts == 0:
+                number_of_posts = number_of_posts_on_page
             number_of_clicks = 0
             skipped_posts = 0
             users_list = []
@@ -318,7 +325,8 @@ class InstagramBot:
                 with open(f'logs/leaderboard_{username}.txt', 'w') as file:
                     for user in counted_occurences_users:
                         file.write(f'{user}\n')
-                print(f'{username} has total number: {len(users_list)} of likes. '
+                print(f'{username} has total number: {len(users_list)} of likes '
+                    f'in {len(number_of_posts)} posts. '
                     'Results saved to the file in /logs. '
                     f'The most active user: {counted_occurences_users[-1][0]}, '
                     f'with total: {counted_occurences_users[-1][1]} likes.')

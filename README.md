@@ -1,9 +1,8 @@
 # InstagramBot
 
-## General info
 With this script you can easily check any account for unfollowers, users not following back and many more. Check Code Usage section below for more functions.  
 
-## Why
+## Why?
 I wanted to create this bot to improve my skills in Selenium and Python. Apart from that I was just curious. :)  
 Sure there is an official Instagram API but there are some restrictions so I decided to develop my own software. 
 
