@@ -19,6 +19,7 @@ from selenium.common.exceptions import NoSuchElementException
 import config as cfg
 import exceptions
 
+
 class InstagramBot:
     """
     Main bot class.
@@ -52,27 +53,27 @@ class InstagramBot:
     def _log_in(self):
         """Log in as username and password given in config.py."""
         # Pass cookies.
-        self.driver.find_element_by_xpath\
-            ('/html/body/div[2]/div/div/div/div[2]/button[1]').click()
+        self.driver.find_element_by_xpath(
+            '/html/body/div[2]/div/div/div/div[2]/button[1]').click()
         # Insert login and password.
-        self.driver.find_element_by_xpath\
-            ('//input[@name=\"username\"]').send_keys(self.username)
-        self.driver.find_element_by_xpath\
-            ('//input[@name=\"password\"]').send_keys(self.password)
+        self.driver.find_element_by_xpath(
+            '//input[@name=\"username\"]').send_keys(self.username)
+        self.driver.find_element_by_xpath(
+            '//input[@name=\"password\"]').send_keys(self.password)
         # Click login.
-        self.driver.find_element_by_xpath\
-            ('//*[@id="loginForm"]/div/div[3]').click()
+        self.driver.find_element_by_xpath(
+            '//*[@id="loginForm"]/div/div[3]').click()
         # Pass remember login popoup.
-        self.driver.find_element_by_xpath\
-            ('//*[@id="react-root"]/section/main/div/div/div/section/div/button').click()
+        self.driver.find_element_by_xpath(
+            '//*[@id="react-root"]/section/main/div/div/div/section/div/button').click()
         # Pass notification popup.
-        self.driver.find_element_by_xpath\
-            ('/html/body/div[4]/div/div/div/div[3]/button[2]').click()
+        self.driver.find_element_by_xpath(
+            '/html/body/div[4]/div/div/div/div[3]/button[2]').click()
 
     def _change_language(self):
         """Changes language to english - crucial for some methods."""
-        Select(self.driver.find_element_by_xpath\
-            ('//*[@id="react-root"]/section/main/section/div[3]/div[3]/nav/ul/li[11]/span/select'))\
+        Select(self.driver.find_element_by_xpath
+               ('//*[@id="react-root"]/section/main/section/div[3]/div[3]/nav/ul/li[11]/span/select'))\
             .select_by_visible_text('English')
 
     def _get_user(self, username):
@@ -89,7 +90,8 @@ class InstagramBot:
     def _get_how_many_followers(self, username):
         """Gets number of followers of user."""
         self._get_user(username)
-        how_many_followers = self.driver.find_elements_by_xpath('//span[@class="g47SY "]')[1].text
+        how_many_followers = self.driver.find_elements_by_xpath(
+            '//span[@class="g47SY "]')[1].text
         if not how_many_followers.isdigit():
             how_many_followers_list = list(how_many_followers)
             for _ in range(0, len(how_many_followers)):
@@ -118,16 +120,18 @@ class InstagramBot:
     def _scroll_likes(self):
         """Gets number of likes under post."""
         # Click likes list.
-        self.driver.find_element_by_xpath\
-            ('/html/body/div[5]/div[2]/div/article/div[3]/section[2]/div/div/button').click()
-        pop_up = self.driver.find_element_by_xpath\
-            ('/html/body/div[6]/div/div/div[2]/div')
+        self.driver.find_element_by_xpath(
+            '/html/body/div[5]/div[2]/div/article/div[3]/section[2]/div/div/button').click()
+        time.sleep(3)
+        pop_up = self.driver.find_element_by_xpath(
+            '/html/body/div[6]/div/div/div[2]/div')
+
         def get_current_scroll_height():
-            return self.driver.execute_script\
-                ('return arguments[0].scrollHeight', pop_up)
+            return self.driver.execute_script('return arguments[0].scrollHeight', pop_up)
+
         def scroll_into(element):
-            self.driver.execute_script\
-                ('arguments[0].scrollIntoView()', element)
+            self.driver.execute_script(
+                'arguments[0].scrollIntoView()', element)
         users_that_liked_post = []
         window_height_changed = time.perf_counter()
         while True:
@@ -142,19 +146,20 @@ class InstagramBot:
             if time.perf_counter() - window_height_changed > 3:
                 break
         # Close likes list.
-        self.driver.find_element_by_xpath\
-            ('/html/body/div[6]/div/div/div[1]/div/div[2]/button').click()
+        self.driver.find_element_by_xpath(
+            '/html/body/div[6]/div/div/div[1]/div/div[2]/button').click()
         return list(set(users_that_liked_post))
 
     def _scroll_popup(self):
         """Scrolls through following/followers pop-up window."""
         pop_up = self.driver.find_element_by_xpath('//div[@class="isgrP"]')
+
         def get_current_scroll_height():
-            return self.driver.execute_script\
-                ('return arguments[0].scrollHeight', pop_up)
+            return self.driver.execute_script('return arguments[0].scrollHeight', pop_up)
+
         def scroll_down(height_to_scroll):
             self.driver.execute_script('arguments[0].scrollBy(0,arguments[1])',
-                                        pop_up, height_to_scroll)
+                                       pop_up, height_to_scroll)
         window_height = 0
         start_scrolling = time.perf_counter()
         while True:
@@ -166,19 +171,20 @@ class InstagramBot:
                 end_scrolling = time.perf_counter()
                 break
         print(f'Scroll ended. It took {trunc(end_scrolling - start_scrolling)} seconds.')
-        usernames_list = [(username.text).replace('\nVerified','')
+        usernames_list = [(username.text).replace('\nVerified', '')
                           for username in self.driver.find_elements_by_xpath('//div[@class="d7ByH"]')]
         return usernames_list
 
     def _get_non_following_back(self, username, first_list, second_list, get_followers_value):
         """Gets non-following back. It's just a difference between first and second list."""
         if self._is_public(username):
-            if get_followers_value:
+            if get_followers_value == True:
                 not_following_back = []
                 print("Getting number of followers for each non-following user...")
                 for user in first_list.difference(second_list):
-                    not_following_back.append([user, self._get_how_many_followers(user)])
-                not_following_back.sort(key = lambda user: user[1])
+                    not_following_back.append(
+                        [user, self._get_how_many_followers(user)])
+                not_following_back.sort(key=lambda user: user[1])
             else:
                 not_following_back = list(first_list.difference(second_list))
         else:
@@ -188,8 +194,8 @@ class InstagramBot:
     def get_following(self, username):
         """Gets users followed by given user."""
         number_of_following_on_page = self._get_how_many_following(username)
-        self.driver.find_element_by_xpath\
-            ('//*[@id="react-root"]/section/main/div/header/section/ul/li[3]/a').click()
+        self.driver.find_element_by_xpath(
+            '//*[@id="react-root"]/section/main/div/header/section/ul/li[3]/a').click()
         print('Getting following list...')
         following_list = self._scroll_popup()
         print(f'Number of loaded following users: {len(following_list)}. '
@@ -199,17 +205,18 @@ class InstagramBot:
     def get_followers(self, username, save_to_file=False):
         """Gets users following given user."""
         number_of_followers_on_page = self._get_how_many_followers(username)
-        self.driver.find_element_by_xpath\
-            ('//*[@id="react-root"]/section/main/div/header/section/ul/li[2]/a').click()
+        self.driver.find_element_by_xpath(
+            '//*[@id="react-root"]/section/main/div/header/section/ul/li[2]/a').click()
         print('Getting followers list...')
         followers_list = self._scroll_popup()
-        print(f'Number of loaded followers users: {len(followers_list)}. '+
+        print(f'Number of loaded followers users: {len(followers_list)}. ' +
               f'{number_of_followers_on_page - len(followers_list)} users missed.')
         if save_to_file:
             with open(f'logs/followers_{username}.txt', 'w') as file:
                 for user in followers_list:
                     file.write(f'{user}\n')
-            print(f'Followers ({number_of_followers_on_page}) have been saved to the file.')
+            print(
+                f'Followers ({number_of_followers_on_page}) have been saved to the file.')
         return followers_list
 
     def get_not_following_back_users(self, username, get_followers_value=True):
@@ -236,10 +243,10 @@ class InstagramBot:
                 file.write(f'{user}\n')
         print(f"{username} is not following back {len(not_following_back)} users. "
               f"That's {trunc(len(not_following_back)/len(followers_list)*100)}% of the list. "
-               "Results are saved to the file in /logs.")
+              "Results are saved to the file in /logs.")
 
     def get_unfollowers(self, username, get_followers_value=True):
-        """Gets users that had followed given user but unfollowed after some time."""
+        """Gets users that had followed user but unfollowed after some time."""
         if self._is_public(username):
             try:
                 past_followers_dir = (f'logs/followers_{username}.txt')
@@ -255,7 +262,8 @@ class InstagramBot:
                     try:
                         self._get_user(unfollower)
                         if get_followers_value:
-                            active_unfollowers.append([unfollower, self._get_how_many_followers(unfollower)])
+                            active_unfollowers.append(
+                                [unfollower, self._get_how_many_followers(unfollower)])
                         else:
                             active_unfollowers.append(unfollower)
                     except exceptions.NoSuchUserException:
@@ -265,7 +273,7 @@ class InstagramBot:
                     for user in active_unfollowers:
                         file.write(f'{user}\n')
                 print(f'{username} has {len(active_unfollowers)} active unfollower(s). '
-                       'Results saved to the file in /logs. '
+                      'Results saved to the file in /logs. '
                       f'User(s) that could not be found: {deleted_users}')
             except OSError:
                 answer = ''
@@ -275,97 +283,120 @@ class InstagramBot:
                 if answer == "Y":
                     self.get_followers(username, save_to_file=True)
                 else:
-                    print('Could not get unfollowers list without previous followers list')
+                    print(
+                        'Could not get unfollowers list without previous followers list')
         else:
             raise exceptions.UserAccountPrivateException(username)
 
-    #TODO: get leaderboard for every post
-    def get_leaderboard(self, username, number_of_post=10):
-        """Get likes from each post on user page and create top-interactions-followers"""
+    def get_leaderboard(self, username, number_of_posts=10, count_occurences=True):
+        """Gets likes from each post on user page and create top-interactions-followers board."""
         if self._is_public(username):
+            if number_of_posts == 0:
+                number_of_posts = self._get_how_many_posts()
             number_of_clicks = 0
+            skipped_posts = 0
             users_list = []
             # Click latest post.
-            self.driver.find_element_by_xpath\
-                ('//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/div[1]/div[1]/a/div').click()
+            self.driver.find_element_by_xpath(
+                '//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/div[1]/div[1]/a/div').click()
             while True:
                 try:
                     users_list += self._scroll_likes()
                 except NoSuchElementException:
-                    print("Could not get users for this post.")
-                if number_of_clicks == number_of_post-1:
+                    skipped_posts += 1
+                if number_of_clicks == number_of_posts-1:
                     break
-                self.driver.find_element_by_css_selector\
-                    ('a.coreSpriteRightPaginationArrow').click()
+                self.driver.find_element_by_css_selector(
+                    'a.coreSpriteRightPaginationArrow').click()
                 number_of_clicks += 1
-            counted_occurences_users = [[user, users_list.count(user)] for user in set(users_list)]
-            # Sort list from most likes.
-            counted_occurences_users.sort(key = lambda user: user[1])
-            with open(f'logs/leaderboard_{username}.txt', 'w') as file:
-                for user in counted_occurences_users:
-                    file.write(f'{user}\n')
-            print(f'{username} has total number: {len(users_list)} of likes. '
+            print(f"Fetched posts: {number_of_posts-skipped_posts}. Skipped: {skipped_posts}")
+            if count_occurences:
+                counted_occurences_users = [
+                    [user, users_list.count(user)] for user in set(users_list)]
+                # Sort list from most likes.
+                counted_occurences_users.sort(key=lambda user: user[1])
+                with open(f'logs/leaderboard_{username}.txt', 'w') as file:
+                    for user in counted_occurences_users:
+                        file.write(f'{user}\n')
+                print(f'{username} has total number: {len(users_list)} of likes. '
                     'Results saved to the file in /logs. '
                     f'The most active user: {counted_occurences_users[-1][0]}, '
                     f'with total: {counted_occurences_users[-1][1]} likes.')
+            else:
+                return users_list
         else:
             raise exceptions.UserAccountPrivateException(username)
 
-    #TODO: ensure print if followed before
-    #TODO: find another way to find "follow" button
+    def get_ghostfollowers(self, username):
+        """Gets ghostfollowers - followers that do not liked any post."""
+        if self._is_public(username):
+            interactive_users = set(self.get_leaderboard(username, 0, False))
+            followers = set(self.get_followers(username))
+            ghostfollowers_list = followers.difference(interactive_users)
+            with open(f'logs/ghostfollowers_{username}.txt', 'w') as file:
+                for user in ghostfollowers_list:
+                    file.write(f'{user}\n')
+            print(f'{username} has total number: {len(ghostfollowers_list)} of ghostfollowers. '
+                'Results saved to the file in /logs.')
+        else:
+            raise exceptions.UserAccountPrivateException(username)
+
+    # TODO: ensure print if followed before
+    # TODO: find another way to find "follow" button
     def follow_user(self, username):
-        """Follows given user."""
+        '''Follows given user.'''
         if self._is_public(username):
             try:
-                self.driver.find_element_by_xpath\
-                    ('//*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/div/div/div/span/span[1]/button').click()
+                self.driver.find_element_by_xpath(
+                    '//*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/div/div/div/span/span[1]/button').click()
                 print(f'{username} has been followed.')
-                #if followed before print that info here
+                # if followed before print that info here
             except NoSuchElementException:
                 try:
-                    self.driver.find_element_by_xpath\
-                        ('//*[@id="react-root"]/section/main/div/header/section/div[1]/div[2]/div/div/div/span/span[1]/button').click()
+                    self.driver.find_element_by_xpath(
+                        '//*[@id="react-root"]/section/main/div/header/section/div[1]/div[2]/div/div/div/span/span[1]/button').click()
                     print('{username} has been followed.')
                 except NoSuchElementException:
                     print(f'Could not follow {username}.')
         else:
             try:
-                self.driver.find_element_by_xpath\
-                    ('//*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/div/div/button').click()
+                self.driver.find_element_by_xpath(
+                    '//*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/div/div/button').click()
             except NoSuchElementException:
                 print(f'Could not follow {username}.')
 
     def like_latest_post(self, username):
         """Likes latest post of desired user."""
         if self._is_public(username):
-            self.driver.find_element_by_xpath\
-                ('//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/div[1]/div[1]/a/div').click()
-            self.driver.find_element_by_xpath\
-                ('/html/body/div[5]/div[2]/div/article/div[3]/section[1]/span[1]/button').click()
+            self.driver.find_element_by_xpath(
+                '//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/div[1]/div[1]/a/div').click()
+            self.driver.find_element_by_xpath(
+                '/html/body/div[5]/div[2]/div/article/div[3]/section[1]/span[1]/button').click()
         else:
             raise exceptions.UserAccountPrivateException(username)
 
     def comment_latest_post(self, username, message):
         """Comment latest post of desired user with given message."""
         if self._is_public(username):
-            self.driver.find_element_by_xpath\
-                ('//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/div[1]/div[1]/a/div').click()
-            self.driver.find_element_by_xpath\
-                ('/html/body/div[5]/div[2]/div/article/div[3]/section[3]/div/form').click()
-            self.driver.find_element_by_xpath\
-                ("/html/body/div[5]/div[2]/div/article/div[3]/section[3]/div/form/textarea").send_keys(message)
-            self.driver.find_element_by_xpath\
-                ('/html/body/div[5]/div[2]/div/article/div[3]/section[3]/div/form/button').click()
+            self.driver.find_element_by_xpath(
+                '//*[@id="react-root"]/section/main/div/div[2]/article/div[1]/div/div[1]/div[1]/a/div').click()
+            self.driver.find_element_by_xpath(
+                '/html/body/div[5]/div[2]/div/article/div[3]/section[3]/div/form').click()
+            self.driver.find_element_by_xpath(
+                "/html/body/div[5]/div[2]/div/article/div[3]/section[3]/div/form/textarea").send_keys(message)
+            self.driver.find_element_by_xpath(
+                '/html/body/div[5]/div[2]/div/article/div[3]/section[3]/div/form/button').click()
         else:
             raise exceptions.UserAccountPrivateException(username)
 
-    #TODO: add how many users have been followed at the end
-    #TODO: comment with desired message
+    # TODO: add how many users have been followed at the end
+    # TODO: comment with desired message
     def follow_from_file(self, like_latest_post):
         """Follows users given in users_to_follow.txt file."""
         with open('users_to_follow.txt', 'r') as file:
             to_follow_list = file.read().splitlines()
-        print(f'Number of records loaded from the file: {len(to_follow_list)}.')
+        print(
+            f'Number of records loaded from the file: {len(to_follow_list)}.')
         for username in to_follow_list:
             try:
                 self.follow_user(username)
@@ -379,30 +410,34 @@ class InstagramBot:
                 print('User {username} does not exist.')
         print('Users have been followed')
 
-#TODO: add parsing argument for comment last post
-#TODO: add argument for number of checked post for leaderboard
+
+# TODO: add parsing argument for comment last post
+# TODO: add argument for number of checked post for leaderboard
 parser = argparse.ArgumentParser(prog='main.py', description='InstagramBot')
 parser.add_argument("username", nargs="?", default=cfg.USERNAME,
-                    type=str, help="check given user")
+                    type=str, help="the target user")
 parser.add_argument("-u", "--unfollowers", action="store_true",
-                    help="check unfollowers for the given user")
+                    help="check unfollowers of the user")
 parser.add_argument("-nu", "--notfollowingbackusers", action="store_true",
-                    help="check users not following back the given user")
+                    help="check users not following back the user")
 parser.add_argument("-un", "--usernotfollowingback", action="store_true",
-                    help="check who user are not following back")
+                    help="check who is the user not following back")
 parser.add_argument("-nf", "--nofollowersvalue", action="store_false",
                     help="do not check followers value")
 parser.add_argument("-lb", "--leaderboard", action="store_true",
                     help="check the most active followers")
+parser.add_argument("-gf", "--ghostfollowers", action="store_true",
+                    help="check ghostfollowers")
 
 parser.add_argument("-f", "--follow", action="store_true",
                     help="follow users from the file")
 parser.add_argument("-l", "--like", action="store_true",
                     help="like latest post (only with -f command)")
-#parser.add_argument("-c", "--comment", nargs="?", default=cfg.COMMENT,
+# parser.add_argument("-c", "--comment", nargs="?", default=cfg.COMMENT,
 #                    help="comment last post with given message (only with -f command)")
 args = parser.parse_args()
-my_bot = InstagramBot(cfg.USERNAME, cfg.PASSWORD, cfg.SKIP_LOGIN, cfg.DISABLE_IMAGES)
+my_bot = InstagramBot(cfg.USERNAME, cfg.PASSWORD,
+                      cfg.SKIP_LOGIN, cfg.DISABLE_IMAGES)
 
 if args.unfollowers:
     my_bot.get_unfollowers(args.username, args.nofollowersvalue)
@@ -415,6 +450,9 @@ if args.usernotfollowingback:
 
 if args.leaderboard:
     my_bot.get_leaderboard(args.username)
+
+if args.ghostfollowers:
+    my_bot.get_ghostfollowers(args.username)
 
 if args.follow:
     my_bot.follow_from_file(args.like)

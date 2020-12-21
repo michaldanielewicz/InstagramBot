@@ -27,18 +27,20 @@ PASSWORD = "    "
 And you are ready to run **main.py**.
 
 ## Code usage
-* [-u] *username* unfollowers for a given user.
-* [-nu] *username* check users not following back given user.
-* [-un] *username* check which users are not followed back by user.
-* [-nf] gives ouput without followers value.
+* [-u] *username* unfollowers of the user.
+* [-nu] *username* check users not following back the user.
+* [-un] *username* check which users are not followed back by the user.
 * [-lb] *username* check user most active followers (in last 10 posts).
+* [-gh] *username* check ghostfollowers - followers which haven't liked any of the user posts.
+* [-nf] gives all these outputs without followers value.
 * [-f] follow each record in txt file.
   
 For example running script:
 ```bash
 python main.py -nu michal_danielewicz
 ```
-will find users not following me back with followers value each. :) 
+will find users not following me back with followers value each. :)  
+The results are saved to *.txt file in /logs.
 
 ## Features
 List of features ready and TODOs for future development.
