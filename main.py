@@ -309,7 +309,7 @@ class InstagramBot:
                 self.driver.find_element_by_css_selector(
                     'a.coreSpriteRightPaginationArrow').click()
                 number_of_clicks += 1
-            print(f"Fetched posts: {number_of_posts-skipped_posts}. Skipped: {skipped_posts}")
+            print(f'Fetched posts: {number_of_posts-skipped_posts}. Skipped: {skipped_posts}.')
             if count_occurences:
                 counted_occurences_users = [
                     [user, users_list.count(user)] for user in set(users_list)]

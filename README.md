@@ -31,7 +31,7 @@ And you are ready to run **main.py**.
 * [-nu] *username* check users not following back the user.
 * [-un] *username* check which users are not followed back by the user.
 * [-lb] *username* check user most active followers (in the last 10 posts).
-* [-gh] *username* check ghostfollowers - followers which haven't liked any of the user posts.
+* [-gf] *username* check ghostfollowers - followers which haven't liked any of the user posts.
 * [-nf] gives all these outputs without followers value.
 * [-f] follow each record in txt file.
   

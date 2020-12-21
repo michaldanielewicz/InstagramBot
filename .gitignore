@@ -5,3 +5,4 @@ users_to_follow.txt
 logs/
 test.py
 chrome_options/
+.vscode/
