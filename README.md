@@ -27,10 +27,10 @@ PASSWORD = "    "
 And you are ready to run **main.py**.
 
 ## Code usage
-* [-u] *username* unfollowers of the user.
+* [-u] *username* check unfollowers of the user.
 * [-nu] *username* check users not following back the user.
 * [-un] *username* check which users are not followed back by the user.
-* [-lb] *username* check user most active followers (in last 10 posts).
+* [-lb] *username* check user most active followers (in the last 10 posts).
 * [-gh] *username* check ghostfollowers - followers which haven't liked any of the user posts.
 * [-nf] gives all these outputs without followers value.
 * [-f] follow each record in txt file.
@@ -54,9 +54,10 @@ List of features ready and TODOs for future development.
 * List unfollowers for given user. (Checks for differences between followers list from the past and current.)
 * Followers leaderboard (most active followers).
 * Follow people from follow list.
+* Ghost followers (people who did not like any of your photo).
 
 ### To-do list:
-* Ghost followers (people who did not like any of your photo).
+* Save results to *.csv file.
 * Like posts from given user.
 * Comment function with given text.
 
