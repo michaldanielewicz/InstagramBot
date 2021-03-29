@@ -68,11 +68,12 @@ class InstagramBot:
         self.driver.find_element_by_xpath(
             '//*[@id="loginForm"]/div/div[3]').click()
         # Pass remember login popoup.
-        self.driver.find_element_by_xpath(
-            '//*[@id="react-root"]/section/main/div/div/div/section/div/button').click()
+    #    self.driver.find_element_by_xpath(
+    #        '//*[@id="react-root"]/section/main/div/div/div/section/div/button').click()
         # Pass notification popup.
-        self.driver.find_element_by_xpath(
-            '/html/body/div[4]/div/div/div/div[3]/button[2]').click()
+    #    self.driver.find_element_by_xpath(
+    #        '/html/body/div[4]/div/div/div/div[3]/button[2]').click()
+
 
     def _change_language(self):
         """Changes language to english - crucial for some methods."""
