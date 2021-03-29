@@ -62,7 +62,8 @@ List of features ready and TODOs for a future development.
 * Comment function with given text.
 
 ## Status
-Project is: _in progress_.
+Project is: _completed_.
+In any cases of errors please send me a message! Due to some changes in html code by Instagram Team it is possible that some action will not perform. 
 
 ## Contact
 Created by [@michaldanielewicz](https://michaldanielewicz.github.io/) - feel free to contact me!
